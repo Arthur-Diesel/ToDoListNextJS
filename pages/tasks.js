@@ -155,7 +155,7 @@ export default function Tasks() {
 
       <div className="container">
         {tasks.map((task) => (
-          <div key={task._id} className="card">
+          <div key={task._id} className="card mb-3 border border-black shadow">
             <div className="card-body">
               <div className="row">
                 <div className="col-12">

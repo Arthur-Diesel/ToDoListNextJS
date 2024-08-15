@@ -1,10 +1,10 @@
-import { TaskStatus } from "@/models/taskStatus";
-import cookie from "cookie";
 import jwt from "jsonwebtoken";
+import cookie from "cookie";
 import { MongoClient, ObjectId } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB;
+const jwtSecret = process.env.JWT_SECRET;
 
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -12,9 +12,11 @@ const client = new MongoClient(uri, {
 });
 
 export default async function handler(req, res) {
-  if (req.method === "PUT") {
+  if (req.method === "GET") {
+    const { userId } = req.query;
     await client.connect();
     const db = client.db(dbName);
+    const usersCollection = db.collection("users");
     const tasksCollection = db.collection("tasks");
 
     const cookies = cookie.parse(req.headers.cookie || "");
@@ -31,39 +33,29 @@ export default async function handler(req, res) {
       return;
     }
 
-    const { id } = jwt.verify(token, process.env.JWT_SECRET);
+    const { id, isAdmin } = jwt.verify(token, jwtSecret);
 
-    if (!id) {
+    if (!id || !isAdmin) {
       res.status(401).json({ message: "Not authenticated!" });
       return;
     }
 
-    const { taskId } = req.query;
-
     try {
-      const task = await tasksCollection.findOne({
-        _id: new ObjectId(taskId),
-        userId: id,
-      });
-
-      if(!task) {
-        res.status(404).json({ message: "Task not found!" });
+      const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+      if (!user) {
+        res.status(404).json({ message: "User not found!" });
         return;
       }
 
-      await tasksCollection.updateOne(
-        { _id: new ObjectId(taskId), userId: id },
-        {
-          $set: {
-            status: TaskStatus.DELETED,
-            lastUpdatedDate: new Date(),
-          },
-        }
-      );
-      res.status(200).json({ message: "Task deleted!" });
+      const tasks = await tasksCollection
+        .find({ userId: userId })
+        .sort({ creationDate: -1 })
+        .toArray();
+
+      res.status(200).json({ message: "Tasks fetched successfully!", tasks });
     } catch (error) {
-      console.log(`Error in /api/tasks/delete: ${error.message}`);
-      res.status(400).json({ message: "Task deletion failed!" });
+      console.log(`Error in /api/admin/users/[userId]: ${error.message}`);
+      res.status(400).json({ message: "Tasks fetching failed!" });
     }
   } else {
     res.status(405).json({ message: "Method not allowed!" });

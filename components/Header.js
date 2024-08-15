@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -16,6 +17,8 @@ export default function Header() {
 
         if (response.status === 200) {
           setIsAuthenticated(true);
+          const data = await response.json();
+          setIsAdmin(data.isAdmin);
         }
       } catch (error) {
         console.error("Failed to check authentication:", error);
@@ -47,9 +50,18 @@ export default function Header() {
             Tasks
           </Link>
         ) : null}
+        {isAdmin ? (
+          <Link
+            href="/admin/users"
+            className="text-white text-decoration-none p-2"
+          >
+            Users
+          </Link>
+        ) : null}
         <div className="ms-auto d-flex align-items-center">
           {isAuthenticated ? (
-            <a href="/"
+            <a
+              href="/"
               className="text-white text-decoration-none p-2 pointer"
               onClick={handleLogout}
             >

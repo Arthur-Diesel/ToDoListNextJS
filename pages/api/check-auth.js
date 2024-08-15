@@ -19,14 +19,14 @@ export default async function handler(req, res) {
       return;
     }
 
-    const { id } = jwt.verify(token, jwtSecret);
+    const { id, isAdmin } = jwt.verify(token, jwtSecret);
 
     if (!id) {
       res.status(401).json({ message: "Not authenticated!" });
       return;
     }
 
-    res.status(200).json({ message: "Authenticated!" });
+    res.status(200).json({ message: "Authenticated!", isAdmin });
     return;
   }
 }

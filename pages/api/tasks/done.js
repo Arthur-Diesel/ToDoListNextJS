@@ -60,7 +60,7 @@ export default async function handler(req, res) {
           },
         }
       );
-      res.status(201).json({ message: "Task completed!" });
+      res.status(200).json({ message: "Task completed!" });
     } catch (error) {
       console.log(`Error in /api/tasks/delete: ${error.message}`);
       res.status(400).json({ message: "Task completion failed!" });

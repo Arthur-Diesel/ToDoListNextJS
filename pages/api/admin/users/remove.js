@@ -1,6 +1,6 @@
-import cookie from "cookie";
-import jwt from "jsonwebtoken";
 import { MongoClient, ObjectId } from "mongodb";
+import jwt from "jsonwebtoken";
+import cookie from "cookie";
 
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB;
@@ -14,7 +14,8 @@ export default async function handler(req, res) {
   if (req.method === "DELETE") {
     await client.connect();
     const db = client.db(dbName);
-    const tasksCollection = db.collection("tasks");
+    const usersCollection = db.collection("users");
+    const adminCollection = db.collection("admins");
 
     const cookies = cookie.parse(req.headers.cookie || "");
 
@@ -30,31 +31,37 @@ export default async function handler(req, res) {
       return;
     }
 
-    const { id } = jwt.verify(token, process.env.JWT_SECRET);
+    const { id, isAdmin } = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!id) {
+    if (!id || !isAdmin) {
       res.status(401).json({ message: "Not authenticated!" });
       return;
     }
 
-    const { taskId } = req.query;
+    const { userId } = req.body;
+
+    if (!userId) {
+      res.status(400).json({ message: "Missing data!" });
+      return;
+    }
 
     try {
-      const task = await tasksCollection.findOne({
-        _id: new ObjectId(taskId),
-        userId: id,
+      const user = await usersCollection.findOne({
+        _id: new ObjectId(userId),
       });
 
-      if (!task) {
-        res.status(404).json({ message: "Task not found!" });
+      if (!user) {
+        res.status(404).json({ message: "User not found!" });
         return;
       }
 
-      await tasksCollection.deleteOne({ _id: new ObjectId(taskId), userId: id });
-      res.status(200).json({ message: "Task excluded!" });
+      await adminCollection.deleteOne({ userId });
+      await usersCollection.deleteOne({ _id: new ObjectId(userId) });
+
+      res.status(200).json({ message: "User removed" });
     } catch (error) {
-      console.log(`Error in /api/tasks/delete: ${error.message}`);
-      res.status(400).json({ message: "Task exclusion failed!" });
+      console.log(`Error in /api/update-admin: ${error.message}`);
+      res.status(400).json({ message: "User removal failed!" });
     }
   } else {
     res.status(405).json({ message: "Method not allowed!" });

@@ -17,6 +17,7 @@ export default async function handler(req, res) {
     await client.connect();
     const db = client.db(dbName);
     const usersCollection = db.collection("users");
+    const adminCollection = db.collection("admins");
 
     const { email, password } = req.body;
 
@@ -37,7 +38,17 @@ export default async function handler(req, res) {
       return;
     }
 
-    const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: "1h" });
+    const userIdString = user._id.toString();
+
+    const userisAdmin = await adminCollection.findOne({
+      userId: userIdString
+    });
+
+    const token = jwt.sign(
+      { id: user._id, isAdmin: userisAdmin != null },
+      jwtSecret,
+      { expiresIn: "1h" }
+    );
 
     res.setHeader(
       "Set-Cookie",

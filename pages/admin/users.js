@@ -81,54 +81,60 @@ export default function Users(req, res) {
         <p className="lead text-center">Gerencie os usuários do sistema</p>
       </div>
       <div className="container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Administrador</th>
-              <th>Data de Criação</th>
-              <th>Última Data de Atualização</th>
-              <th>Tarefas</th>
-              <th>Remover</th>
-              <th>Tornar Administrador</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user._id}>
-                <th scope="row">{users.indexOf(user) + 1}</th>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.isAdmin ? "Sim" : "Não"}</td>
-                <td>{new Date(user.creationDate).toLocaleString()}</td>
-                <td>{new Date(user.lastUpdatedDate).toLocaleString()}</td>
-                <td>
-                  <Link target="_blank" href={`/admin/tasks/${user._id}`} className="btn btn-primary">
-                    Tarefas
-                  </Link>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleRemoveUser(user._id)}
-                  >
-                    Remover
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => handleUpdateAdmin(user._id)}
-                  >
-                    Tornar Administrador
-                  </button>
-                </td>
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Administrador</th>
+                <th>Data de Criação</th>
+                <th>Última Data de Atualização</th>
+                <th>Tarefas</th>
+                <th>Remover</th>
+                <th>Tornar Administrador</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user._id}>
+                  <th scope="row">{users.indexOf(user) + 1}</th>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.isAdmin ? "Sim" : "Não"}</td>
+                  <td>{new Date(user.creationDate).toLocaleString()}</td>
+                  <td>{new Date(user.lastUpdatedDate).toLocaleString()}</td>
+                  <td>
+                    <Link
+                      target="_blank"
+                      href={`/admin/tasks/${user._id}`}
+                      className="btn btn-primary"
+                    >
+                      Tarefas
+                    </Link>
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleRemoveUser(user._id)}
+                    >
+                      Remover
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => handleUpdateAdmin(user._id)}
+                    >
+                      Tornar Administrador
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );

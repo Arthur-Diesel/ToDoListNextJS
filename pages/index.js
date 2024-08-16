@@ -39,7 +39,7 @@ export default function Home() {
             onClick={
               isAuthenticated
                 ? () => (window.location.href = "/tasks")
-                : () => (window.location.href = "/signup")
+                : () => (window.location.href = "/register")
             }
           >
             Comece a utilizar agora!
